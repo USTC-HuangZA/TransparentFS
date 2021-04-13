@@ -30,6 +30,7 @@ class TFS(BaseFS):
         #     open(os.path.join(path, '{:03x}'.format(i)), 'ab').close()
         self.bitmap = [TFS.FREE] * config.block_numbers
         self.file_list = {}
+        self.overwritten = 0
 
     def allocate_blocks(self, blocks, lm_fn):
         cnt = 0
@@ -57,6 +58,8 @@ class TFS(BaseFS):
         for pos in range(offset, offset + length):
             if fn(self.bitmap[pos]):
                 after = TFSFileStateMachine.apply(self.bitmap[pos], operation)
+                if after == TFS.ALLOCATED_OVERWRITTEN:
+                    self.overwritten += 1
                 if after != TFS.INVALID:
                     self.bitmap[pos] = after
 

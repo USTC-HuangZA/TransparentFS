@@ -11,12 +11,14 @@ import jsonpickle
 from fs.NormalFS import NormalFS
 from fs.TFS import TFS
 from fs.client import BatchFSWrapper
+from fs.HotTFS import HotTFS
 
 root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static")
 
 fake = Faker()
 app = Flask(__name__)
 app.config['SECRET_KEY'] = fake.uuid4()
+
 
 
 def get_session_tfs():
@@ -54,8 +56,9 @@ def demo2():
     rate = float(request.args.get('rate', 1.5))
     tfs = TFS()
     nfs = NormalFS()
+    hotfs = HotTFS()
     normal_set, contrib_set, all_set = set(), set(), set()
-    fs = BatchFSWrapper([nfs, tfs])
+    fs = BatchFSWrapper([nfs, tfs, hotfs])
     weight = [1] * int(10 * rate) + [2] * 10 + [3] * 0 + [4] * 5 + [5] * int(5 * rate) + [6] * 5
     bitmap_hist = []
     for _ in range(300):
@@ -63,6 +66,7 @@ def demo2():
         ins = random.choice(weight)
         tfs_old = tfs.bitmap.copy()
         nfs_old = nfs.bitmap.copy()
+        hotfs_old = hotfs.bitmap.copy()
         if ins == 1:
             name = fake.file_name()
             while name in all_set:
@@ -112,10 +116,17 @@ def demo2():
         if change:
             bitmap_hist.append(
                 {'event': config.global_event_recorder, 'tfs_diff': tfs.bitmap_diff(tfs_old, tfs.bitmap),
-                 'nfs_diff': nfs.bitmap_diff(nfs_old, nfs.bitmap)})
+                 'nfs_diff': nfs.bitmap_diff(nfs_old, nfs.bitmap),
+                 'hotfs_diff': hotfs.bitmap_diff(hotfs_old, hotfs.bitmap),
+                 'hotfs_counter': hotfs.counter.copy(),
+                 'tfs_overwritten':tfs.overwritten,
+                 'hotfs_overwritten':hotfs.overwritten}
+                 )
 
     tfs_old = tfs.bitmap.copy()
     nfs_old = nfs.bitmap.copy()
+    hotfs_old = hotfs.bitmap.copy()
+
     for file in list(contrib_set):
         fs.delete_contrib_file(file)
     bitmap_hist.append(
@@ -123,3 +134,6 @@ def demo2():
          'nfs_diff': nfs.bitmap_diff(nfs_old, nfs.bitmap)})
 
     return jsonify({'items': bitmap_hist})
+
+if __name__ == '__main__':
+     app.run(host="0.0.0.0", port=5000, debug=True)
