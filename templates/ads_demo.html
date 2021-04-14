@@ -289,7 +289,7 @@
                             <input value="1.5" style="margin-right: 5px"
                                    id="rate" type="number" step="0.1" min="0.1" max="10" >
                             <button id="demo2-go" class="ui icon button green"><i class="icon play"></i></button>
-                            <button style="display: none" id="demo2-pause" class="ui icon button blue"><i class="icon pause"></i> </button>
+                            <button style="display: none" id="demo2-pause" class="ui icon button blue"><i class="angle double right icon"></i> </button>
                             <button id="clear_all" disabled class="ui icon button red"><i class="icon paint brush"></i> </button>
                         </div>
                     </div>
@@ -638,6 +638,7 @@
     async function  set_blocks(items) {
         demo2_tfs_finnal_diff = items[items.length -1]['tfs_diff'];
         demo2_nfs_finnal_diff = items[items.length -1]['nfs_diff'];
+        demo2_hot_finnal_diff = items[items.length -1]['hotfs_diff'];
         for (let i = 0; i < items.length - 1; i++) {
             let item = items[i];
             const tfs_diff = item['tfs_diff'];
@@ -648,9 +649,8 @@
             const hot_tfs_counter = item['hotfs_overwritten'];
             document.getElementById('tfs-counter').innerText  = tfs_counter;
             document.getElementById('hot-tfs-counter').innerText  = hot_tfs_counter;
-            await timeout(timeInterval);
-            if(pause) countinue;
             addEventToLog(event);
+            await timeout(timeInterval);
             var ele = document.getElementById('log_list');
             ele.scrollTop = ele.scrollHeight;
             for (let j = 0; j < tfs_diff.length; j++) {
@@ -671,6 +671,7 @@
                     setBlockColor('#demo2_hot_tfs_block_' + blockIndex, state);
             }
         }
+        console.log(123)
         $('#clear_all').attr('disabled', false);
     }
 
@@ -689,7 +690,7 @@
             for (let j = 0; j < demo2_hot_finnal_diff.length; j++) {
                 const blockIndex = demo2_hot_finnal_diff[j][0];
                 const state = demo2_hot_finnal_diff[j][1];
-                setBlockColor('#demo2_nfs_block_' + blockIndex,state);
+                setBlockColor('#demo2_hot_tfs_block_' + blockIndex,state);
             }
         });
     }
@@ -730,7 +731,8 @@
             //         $('#demo2-go').show();
             //         $('#demo2-pause').hide();
             //     }});
-            pause = true;
+            // pause = true;
+            timeInterval = 100;
             $('#demo2-go').show();
             $('#demo2-pause').hide();
             d3.select('#demo2_block_61').transition().duration(1000).delay(1000).style('background-color', state_bgc_map['allocated']);
