@@ -131,7 +131,9 @@ def demo2():
         fs.delete_contrib_file(file)
     bitmap_hist.append(
         {'event': 'delete all', 'tfs_diff': tfs.bitmap_diff(tfs_old, tfs.bitmap),
-         'nfs_diff': nfs.bitmap_diff(nfs_old, nfs.bitmap)})
+         'nfs_diff': nfs.bitmap_diff(nfs_old, nfs.bitmap),
+         'hotfs_diff': hotfs.bitmap_diff(hotfs_old, hotfs.bitmap)}
+         )
 
     return jsonify({'items': bitmap_hist})
 
